@@ -5,7 +5,7 @@ import SuccessBanner from "../../components/SuccessBanner";
 import Spinner from "../../components/Spinner";
 import { useEtudiantIdentity } from "../../hooks/useEtudiantIdentity";
 import { marquerPresence } from "../../api/presences";
-import { deposerExercice, consulterExercices } from "../../api/exercices";
+import { deposerExercice, consulterExercices, remplacerLienExercice } from "../../api/exercices";
 import { isNetworkError } from "../../api/client";
 
 const STATUT_LABEL = {
@@ -22,6 +22,9 @@ const STATUT_COLOR = {
   RELU: { bg: "var(--success-bg)", fg: "var(--success)" },
 };
 
+// RG12 : remplaçable tant qu'aucune relecture n'a été rendue.
+const STATUTS_REMPLACABLES = new Set(["DEPOSE", "EN_ATTENTE"]);
+
 export default function EtudiantScreen() {
   const { etudiants, etudiantId, setEtudiantId, loading: loadingEtudiants } = useEtudiantIdentity();
 
@@ -35,6 +38,10 @@ export default function EtudiantScreen() {
   const [exercices, setExercices] = useState([]);
   const [exercicesError, setExercicesError] = useState(null);
   const [exercicesLoading, setExercicesLoading] = useState(false);
+
+  const [remplacementId, setRemplacementId] = useState(null);
+  const [nouveauLien, setNouveauLien] = useState("");
+  const [remplacementState, setRemplacementState] = useState({ loading: false, error: null });
 
   const rafraichirExercices = useCallback(() => {
     if (!etudiantId) return;
@@ -82,6 +89,19 @@ export default function EtudiantScreen() {
       rafraichirExercices();
     } catch (err) {
       setDepotState({ loading: false, error: err, success: null });
+    }
+  };
+
+  const handleRemplacerLien = async (exerciceId) => {
+    setRemplacementState({ loading: true, error: null });
+    try {
+      await remplacerLienExercice(exerciceId, nouveauLien.trim());
+      setRemplacementState({ loading: false, error: null });
+      setRemplacementId(null);
+      setNouveauLien("");
+      rafraichirExercices();
+    } catch (err) {
+      setRemplacementState({ loading: false, error: err });
     }
   };
 
@@ -168,6 +188,7 @@ export default function EtudiantScreen() {
           </button>
         </div>
         <ErrorBanner error={exercicesError} />
+        <ErrorBanner error={remplacementState.error} />
         {exercicesLoading ? (
           <Spinner />
         ) : !etudiantId ? (
@@ -182,6 +203,7 @@ export default function EtudiantScreen() {
                 <th>Statut</th>
                 <th>Note retenue</th>
                 <th>Commentaires reçus</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -220,6 +242,50 @@ export default function EtudiantScreen() {
                           ))}
                         </ul>
                       )}
+                    </td>
+                    <td>
+                      {STATUTS_REMPLACABLES.has(ex.statut) &&
+                        (remplacementId === ex.id ? (
+                          <div style={{ display: "flex", gap: 6, alignItems: "center", minWidth: 220 }}>
+                            <input
+                              type="url"
+                              value={nouveauLien}
+                              onChange={(e) => setNouveauLien(e.target.value)}
+                              placeholder="Nouveau lien"
+                              style={{ width: 160 }}
+                            />
+                            <button
+                              type="button"
+                              className="btn secondary"
+                              disabled={remplacementState.loading || !nouveauLien.trim()}
+                              onClick={() => handleRemplacerLien(ex.id)}
+                            >
+                              {remplacementState.loading ? <Spinner /> : "Valider"}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn secondary"
+                              onClick={() => {
+                                setRemplacementId(null);
+                                setNouveauLien("");
+                                setRemplacementState({ loading: false, error: null });
+                              }}
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn secondary"
+                            onClick={() => {
+                              setRemplacementId(ex.id);
+                              setNouveauLien(ex.lien);
+                            }}
+                          >
+                            Remplacer le lien
+                          </button>
+                        ))}
                     </td>
                   </tr>
                 );
