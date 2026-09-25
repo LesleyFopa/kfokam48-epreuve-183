@@ -11,12 +11,14 @@ import com.kfokam48.presence.repository.SessionRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 
 @Service
+@Transactional
 public class SessionService {
 
     private static final String ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -52,6 +54,18 @@ public class SessionService {
 
         session = sessionRepository.save(session);
         return new SessionResponse(session.getId(), session.getCode(), session.getOuvertureAt(), session.getExpirationAt());
+    }
+
+    /** EF8, RG14 : clôture explicite et irréversible d'une session par le formateur. */
+    public void cloturer(Long sessionId) {
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "SESSION_INCONNUE", "Session inconnue."));
+        if (!session.estOuverte()) {
+            throw new ApiException(HttpStatus.CONFLICT, "SESSION_DEJA_CLOTUREE", "Cette session est déjà clôturée.");
+        }
+        session.setStatut(StatutSession.CLOTUREE);
+        session.setClotureAt(Instant.now());
+        sessionRepository.save(session);
     }
 
     private String genererCodeUnique() {

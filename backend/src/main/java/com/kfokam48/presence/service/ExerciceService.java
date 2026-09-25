@@ -8,6 +8,7 @@ import com.kfokam48.presence.domain.Session;
 import com.kfokam48.presence.domain.StatutExercice;
 import com.kfokam48.presence.dto.ExerciceCreateResponse;
 import com.kfokam48.presence.dto.ExerciceRequest;
+import com.kfokam48.presence.dto.ExerciceVueEtudiant;
 import com.kfokam48.presence.exception.ApiException;
 import com.kfokam48.presence.repository.EtudiantRepository;
 import com.kfokam48.presence.repository.ExerciceRepository;
@@ -16,6 +17,7 @@ import com.kfokam48.presence.repository.RelectureRepository;
 import com.kfokam48.presence.repository.SessionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
+@Transactional
 public class ExerciceService {
 
     private static final Pattern LIEN_VALIDE = Pattern.compile("^https?://\\S+\\.\\S+.*$");
@@ -89,6 +92,27 @@ public class ExerciceService {
         }
 
         return new ExerciceCreateResponse(exercice.getId(), exercice.getStatut().name());
+    }
+
+    /** EF11, RG7 : l'étudiant consulte ses exercices, note et commentaire reçus, jamais le relecteur. */
+    public List<ExerciceVueEtudiant> consulterParEtudiant(Long etudiantId) {
+        if (!etudiantRepository.existsById(etudiantId)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "ETUDIANT_INCONNU", "Étudiant inconnu.");
+        }
+        return exerciceRepository.findByEtudiantId(etudiantId).stream()
+                .map(exercice -> {
+                    var relecture = relectureRepository.findByExerciceId(exercice.getId()).orElse(null);
+                    Integer note = null;
+                    String commentaire = null;
+                    if (relecture != null && relecture.getStatut() == com.kfokam48.presence.domain.StatutRelecture.RENDUE) {
+                        note = relecture.getNote();
+                        commentaire = relecture.getCommentaire();
+                    }
+                    return new ExerciceVueEtudiant(
+                            exercice.getId(), exercice.getSession().getId(), exercice.getLien(),
+                            exercice.getStatut().name(), note, commentaire);
+                })
+                .toList();
     }
 
     private Etudiant tirerRelecteur(Long sessionId, Long deposantId) {

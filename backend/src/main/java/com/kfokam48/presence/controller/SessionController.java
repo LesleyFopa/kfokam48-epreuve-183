@@ -9,6 +9,7 @@ import com.kfokam48.presence.service.SessionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,5 +39,11 @@ public class SessionController {
             @PathVariable Long id, @Valid @RequestBody PresenceManuelleRequest requete) {
         PresenceResponse reponse = presenceService.ajouterManuellement(id, requete);
         return ResponseEntity.status(HttpStatus.CREATED).body(reponse);
+    }
+
+    @PatchMapping("/{id}/cloturer")
+    public ResponseEntity<Void> cloturer(@PathVariable Long id) {
+        sessionService.cloturer(id);
+        return ResponseEntity.noContent().build();
     }
 }

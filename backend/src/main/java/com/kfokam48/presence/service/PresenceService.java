@@ -13,10 +13,12 @@ import com.kfokam48.presence.repository.PresenceRepository;
 import com.kfokam48.presence.repository.SessionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
 @Service
+@Transactional
 public class PresenceService {
 
     private final PresenceRepository presenceRepository;

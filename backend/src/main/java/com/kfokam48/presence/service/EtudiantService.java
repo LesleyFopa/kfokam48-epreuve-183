@@ -6,10 +6,12 @@ import com.kfokam48.presence.repository.EtudiantRepository;
 import com.kfokam48.presence.repository.PromotionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class EtudiantService {
 
     private final EtudiantRepository etudiantRepository;
