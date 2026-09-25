@@ -225,6 +225,34 @@ paths:
         "404": { $ref: "#/components/responses/Erreur" }   # EXERCICE_INCONNU
         "409": { $ref: "#/components/responses/Erreur" }   # RELECTURE_DEJA_COMMENCEE
 
+  /api/relectures:
+    get:
+      summary: >
+        Un relecteur consulte les relectures qui lui sont assignées, pour
+        choisir laquelle rendre (EF5). Oublié à l'analyse : sans ceci,
+        rien ne permet au relecteur de découvrir l'identifiant à utiliser
+        sur POST /api/relectures/{id}.
+      parameters:
+        - name: relecteurId
+          in: query
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Relectures assignées à ce relecteur
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, exerciceId, lienExercice, statut]
+                  properties:
+                    id: { type: integer, format: int64 }
+                    exerciceId: { type: integer, format: int64 }
+                    lienExercice: { type: string, format: uri }
+                    statut: { type: string, enum: [ASSIGNEE, RENDUE] }
+
   /api/relectures/{id}:
     post:
       summary: Un relecteur rend sa note et son commentaire
