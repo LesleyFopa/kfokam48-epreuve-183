@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(readOnly = true)
@@ -55,12 +56,22 @@ public class TableauService {
         List<Exercice> exercices = exerciceRepository.findByEtudiantId(etudiant.getId());
         long exercicesDeposes = exercices.size();
 
-        List<Integer> notes = exercices.stream()
-                .map(ex -> relectureRepository.findByExerciceId(ex.getId()).orElse(null))
-                .filter(r -> r != null && r.getStatut() == StatutRelecture.RENDUE)
-                .map(Relecture::getNote)
+        // RG17, étape 3 : la note retenue d'un exercice est la moyenne de ses
+        // relectures rendues (1 ou 2) ; la moyenne du tableau agrège ces notes
+        // retenues, jamais les relectures individuelles directement.
+        List<Double> notesRetenues = exercices.stream()
+                .map(ex -> {
+                    List<Integer> rendues = relectureRepository.findByExerciceId(ex.getId()).stream()
+                            .filter(r -> r.getStatut() == StatutRelecture.RENDUE)
+                            .map(Relecture::getNote)
+                            .toList();
+                    return rendues.isEmpty() ? null : rendues.stream().mapToInt(Integer::intValue).average().orElse(0);
+                })
+                .filter(Objects::nonNull)
                 .toList();
-        Double moyenne = notes.isEmpty() ? null : notes.stream().mapToInt(Integer::intValue).average().orElse(0);
+        Double moyenne = notesRetenues.isEmpty()
+                ? null
+                : notesRetenues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
 
         long relecturesEnAttente = relectureRepository.findByRelecteurId(etudiant.getId()).stream()
                 .filter(r -> r.getStatut() != StatutRelecture.RENDUE)

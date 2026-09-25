@@ -11,12 +11,14 @@ import { isNetworkError } from "../../api/client";
 const STATUT_LABEL = {
   DEPOSE: "Déposé",
   EN_ATTENTE: "En attente de relecture",
+  PROVISOIRE: "Note provisoire",
   RELU: "Relu",
 };
 
 const STATUT_COLOR = {
   DEPOSE: { bg: "var(--iconbadgebg)", fg: "var(--accent)" },
   EN_ATTENTE: { bg: "var(--danger-bg)", fg: "var(--danger)" },
+  PROVISOIRE: { bg: "var(--iconbadgebg3)", fg: "var(--accent4)" },
   RELU: { bg: "var(--success-bg)", fg: "var(--success)" },
 };
 
@@ -178,13 +180,14 @@ export default function EtudiantScreen() {
               <tr>
                 <th>Lien</th>
                 <th>Statut</th>
-                <th>Note</th>
-                <th>Commentaire</th>
+                <th>Note retenue</th>
+                <th>Commentaires reçus</th>
               </tr>
             </thead>
             <tbody>
               {exercices.map((ex) => {
                 const color = STATUT_COLOR[ex.statut] ?? STATUT_COLOR.DEPOSE;
+                const commentaires = (ex.relectures ?? []).filter((r) => r.statut === "RENDUE");
                 return (
                   <tr key={ex.id}>
                     <td>
@@ -197,8 +200,27 @@ export default function EtudiantScreen() {
                         {STATUT_LABEL[ex.statut] ?? ex.statut}
                       </span>
                     </td>
-                    <td>{ex.note ?? "—"}</td>
-                    <td>{ex.commentaire ?? "—"}</td>
+                    <td>
+                      {ex.noteRetenue ?? "—"}
+                      {ex.provisoire && (
+                        <span className="muted" style={{ display: "block", fontSize: 11 }}>
+                          en attente du second avis
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {commentaires.length === 0 ? (
+                        "—"
+                      ) : (
+                        <ul style={{ margin: 0, paddingLeft: 16 }}>
+                          {commentaires.map((r, i) => (
+                            <li key={i}>
+                              {r.note} — {r.commentaire}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
