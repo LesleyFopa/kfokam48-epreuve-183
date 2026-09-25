@@ -79,6 +79,42 @@ paths:
         "404": { $ref: "#/components/responses/Erreur" }   # SESSION_INCONNUE
         "409": { $ref: "#/components/responses/Erreur" }   # SESSION_DEJA_CLOTUREE
 
+  /api/sessions/{id}/presences:
+    post:
+      summary: >
+        Le formateur ajoute une présence manuellement, sans code (Q14, EF7, RG13).
+        Oublié à l'analyse : POST /api/presences est l'opération imposée pour
+        l'étudiant avec code, elle ne pouvait pas être détournée pour ce cas.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [etudiantId]
+              properties:
+                etudiantId: { type: integer, format: int64 }
+      responses:
+        "201":
+          description: Présence ajoutée manuellement
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, sessionId, etudiantId, source]
+                properties:
+                  id: { type: integer, format: int64 }
+                  sessionId: { type: integer, format: int64 }
+                  etudiantId: { type: integer, format: int64 }
+                  source: { type: string, enum: [ETUDIANT, FORMATEUR] }
+        "404": { $ref: "#/components/responses/Erreur" }   # SESSION_INCONNUE
+        "409": { $ref: "#/components/responses/Erreur" }   # DEJA_PRESENT
+
   /api/presences:
     post:
       summary: Un étudiant marque sa présence avec le code
