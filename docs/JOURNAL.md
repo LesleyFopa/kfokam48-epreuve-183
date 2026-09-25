@@ -34,11 +34,11 @@ Chaque entrée répond aux trois mêmes questions :
 
 ## Étape 3 — Enveloppe
 
-**Fait :**
+**Fait (partie 1, bug) :** issue #26 ouverte avant tout code, décrivant le signalement client et sa reproduction. Écrit `PresenceConcurrencyTest` (deux vrais threads) pour le prouver. Corrigé la condition de course dans `PresenceService` (contrôle "déjà présent" non atomique avec l'insertion) en s'appuyant sur la contrainte unique en base plutôt que sur le contrôle applicatif seul. Test rejoué 5 fois après correction : 5/5. PR séparée mergée, issue fermée par le commit.
 
-**Bloqué :**
+**Bloqué :** ~20 min sur la traduction du signalement client. Un premier test avec deux étudiants *différents* (description littérale du client) ne reproduisait rien — le contrôle d'unicité est scopé par étudiant, aucun conflit possible entre deux personnes distinctes. Le vrai scénario non atomique est une double soumission du *même* étudiant ; un client non technique décrit facilement les deux situations de la même façon ("un des deux n'est pas passé").
 
-**IA :**
+**IA :** proposé plusieurs hypothèses de cause (pool de connexions, verrouillage H2, état partagé) avant la bonne. Vérifié en écrivant le test AVANT de choisir : le test avec deux étudiants différents passait (pas de bug), celui avec le même étudiant échouait de façon reproductible (5/5) — c'est ce résultat empirique qui a tranché, pas une supposition.
 
 **Ce que j'ai sorti du périmètre pour absorber le changement, et pourquoi :**
 
