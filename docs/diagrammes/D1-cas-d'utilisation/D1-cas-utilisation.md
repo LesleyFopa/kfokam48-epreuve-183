@@ -33,7 +33,7 @@ flowchart LR
 
     subgraph CAS_SYSTEME [ ]
         UC12(["Générer et faire expirer le code — RG1"])
-        UC13(["Assigner un relecteur aléatoire — EF4, RG6"])
+        UC13(["Assigner deux relecteurs distincts — EF4, RG5, RG6"])
         UC14(["Calculer la moyenne affichée — EF6"])
     end
 
