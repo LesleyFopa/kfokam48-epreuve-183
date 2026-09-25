@@ -58,6 +58,6 @@ Chaque entrée répond aux trois mêmes questions :
 
 ## Étape 5 — Soumission
 
-**Fait :**
+**Fait :** dépôt vérifié public et accessible en visiteur anonyme (`curl` sans authentification sur le dépôt et sur le commit final, 200 dans les deux cas). Hash final relevé (`29d0fe1...`, 40 caractères). `SOUMISSION.md` rédigé — section Épreuve Git retirée (supprimée du sujet cette session, confirmé par le prof), reste du fichier rempli.
 
-**Ce que je referais autrement avec une journée de plus :**
+**Ce que je referais autrement avec une journée de plus :** rien côté produit — le backlog est vide, Must et Should livrés. J'ajouterais une authentification minimale sur les actions formateur (ouvrir/clôturer une session), repérée en cours de route comme absence de contrôle mais hors périmètre du sujet (Q1 ne l'exige que pour les étudiants).
