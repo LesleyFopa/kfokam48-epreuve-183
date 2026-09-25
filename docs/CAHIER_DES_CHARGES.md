@@ -1,6 +1,6 @@
-# Cahier des charges — Suivi de présence, dépôts et relectures KFOKAM48
+# Cahier des charges : Suivi de présence, dépôts et relectures KFOKAM48
 
-Auteur : KF48-183 · Version 1 · Frontend choisi : React, parce que la maquette ne compte que 3 écrans simples et que l'écosystème React réduit le risque de blocage sur un point technique dans le temps imparti.
+Auteur : KF48183  · Frontend choisi : React, parce que la maquette ne compte que 3 écrans simples et que l'écosystème React réduit le risque de blocage sur un point technique dans le temps imparti.
 
 ## 1. Contexte et objectif
 
@@ -8,16 +8,18 @@ La direction de la formation KFOKAM48 organise des sessions de cours pendant les
 
 ## 2. Acteurs et rôles
 
-| Acteur | Ce qu'il peut faire |
-|---|---|
-| Formateur | Ouvrir une session, clôturer une session, ajouter une présence manuellement, consulter le tableau de bord par étudiant |
-| Étudiant | Se choisir dans une liste (pas de mot de passe), marquer sa présence, déposer ou remplacer le lien de son exercice, consulter la note et le commentaire reçus sur son exercice |
+
+| Acteur    | Ce qu'il peut faire                                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Formateur | Ouvrir une session, clôturer une session, ajouter une présence manuellement, consulter le tableau de bord par étudiant                                                                                           |
+| Étudiant | Se choisir dans une liste (pas de mot de passe), marquer sa présence, déposer ou remplacer le lien de son exercice, consulter la note et le commentaire reçus sur son exercice                                   |
 | Relecteur | Rôle temporaire porté par un étudiant présent à la session, assigné automatiquement par le système ; note et commente l'exercice qui lui est assigné, peut corriger sa note tant que la session est ouverte |
-| Système | Génère et fait expirer le code de présence, tire au sort le relecteur parmi les étudiants présents, calcule la moyenne affichée au formateur |
+| Système  | Génère et fait expirer le code de présence, tire au sort le relecteur parmi les étudiants présents, calcule la moyenne affichée au formateur                                                                  |
 
 ## 3. Périmètre
 
 **Inclus :**
+
 - Ouverture et clôture de session, génération et validation du code de présence
 - Marquage de présence par l'étudiant et ajout manuel par le formateur
 - Dépôt et remplacement du lien d'exercice
@@ -26,6 +28,7 @@ La direction de la formation KFOKAM48 organise des sessions de cours pendant les
 - Gestion des erreurs conforme au contrat d'API (`api/contrat.yaml`)
 
 **Exclu :**
+
 - Authentification par mot de passe ou compte utilisateur (Q1)
 - Gestion administrative des promotions et des étudiants (création, import, édition) — on suppose une liste déjà existante
 - Notifications (email, push, SMS)
@@ -35,60 +38,64 @@ La direction de la formation KFOKAM48 organise des sessions de cours pendant les
 
 ## 4. Exigences fonctionnelles
 
-| Réf | Exigence | Critère d'acceptation | Priorité |
-|---|---|---|---|
-| EF1 | Le formateur ouvre une session et obtient un code de présence | Quand le formateur crée une session (titre + promotion), il reçoit immédiatement un code, une date d'ouverture et une date d'expiration à +15 min | Must |
-| EF2 | L'étudiant marque sa présence avec un code | Quand un étudiant saisit un code valide et non expiré, sa présence apparaît dans le tableau du formateur avec la source `ETUDIANT` | Must |
-| EF3 | L'étudiant dépose le lien de son exercice | Quand un étudiant dépose un lien pour une session où il est présent, l'exercice apparaît au statut « déposé » | Must |
-| EF4 | Le système assigne un relecteur aléatoire à un exercice déposé | Après dépôt, un relecteur est tiré au sort parmi les étudiants présents à la session, différent du déposant | Must |
-| EF5 | Le relecteur note et commente l'exercice assigné | Quand le relecteur envoie une note entière (0–20) et un commentaire, l'exercice passe au statut « relu » et la moyenne de l'étudiant déposant se met à jour dans le tableau | Must |
-| EF6 | Le formateur consulte un tableau de bord par étudiant | Le tableau affiche, par étudiant : présence par session, nombre d'exercices déposés, moyenne des notes reçues, relectures encore dues | Must |
-| EF7 | Le formateur ajoute une présence manuellement | Quand le formateur ajoute une présence pour un étudiant absent, elle apparaît dans le tableau avec la source `FORMATEUR` | Must |
-| EF8 | Le formateur clôture une session | Quand le formateur clôture une session, plus aucune présence, aucun dépôt ni aucune correction de note n'est accepté sur cette session | Must |
-| EF9 | Le relecteur corrige une note déjà envoyée | Tant que la session n'est pas clôturée, le relecteur peut renvoyer une note et un commentaire qui remplacent les précédents | Should |
-| EF10 | L'étudiant remplace le lien de son exercice | Tant qu'aucune relecture n'a été commencée sur son exercice, l'étudiant peut soumettre un nouveau lien qui remplace l'ancien | Should |
-| EF11 | L'étudiant relu consulte sa note et son commentaire | L'étudiant voit la note et le commentaire de son exercice relu, sans jamais voir l'identité du relecteur | Must |
-| EF12 | L'étudiant s'identifie sans mot de passe | L'étudiant sélectionne son nom dans la liste des étudiants de sa promotion avant de marquer sa présence ou déposer un exercice | Must |
+
+| Réf | Exigence                                                            | Critère d'acceptation                                                                                                                                                             | Priorité |
+| ---- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| EF1  | Le formateur ouvre une session et obtient un code de présence      | Quand le formateur crée une session (titre + promotion), il reçoit immédiatement un code, une date d'ouverture et une date d'expiration à +15 min                              | Must      |
+| EF2  | L'étudiant marque sa présence avec un code                        | Quand un étudiant saisit un code valide et non expiré, sa présence apparaît dans le tableau du formateur avec la source`ETUDIANT`                                              | Must      |
+| EF3  | L'étudiant dépose le lien de son exercice                         | Quand un étudiant dépose un lien pour une session où il est présent, l'exercice apparaît au statut « déposé »                                                             | Must      |
+| EF4  | Le système assigne un relecteur aléatoire à un exercice déposé | Après dépôt, un relecteur est tiré au sort parmi les étudiants présents à la session, différent du déposant                                                               | Must      |
+| EF5  | Le relecteur note et commente l'exercice assigné                   | Quand le relecteur envoie une note entière (0–20) et un commentaire, l'exercice passe au statut « relu » et la moyenne de l'étudiant déposant se met à jour dans le tableau | Must      |
+| EF6  | Le formateur consulte un tableau de bord par étudiant              | Le tableau affiche, par étudiant : présence par session, nombre d'exercices déposés, moyenne des notes reçues, relectures encore dues                                         | Must      |
+| EF7  | Le formateur ajoute une présence manuellement                      | Quand le formateur ajoute une présence pour un étudiant absent, elle apparaît dans le tableau avec la source`FORMATEUR`                                                         | Must      |
+| EF8  | Le formateur clôture une session                                   | Quand le formateur clôture une session, plus aucune présence, aucun dépôt ni aucune correction de note n'est accepté sur cette session                                        | Must      |
+| EF9  | Le relecteur corrige une note déjà envoyée                       | Tant que la session n'est pas clôturée, le relecteur peut renvoyer une note et un commentaire qui remplacent les précédents                                                    | Should    |
+| EF10 | L'étudiant remplace le lien de son exercice                        | Tant qu'aucune relecture n'a été commencée sur son exercice, l'étudiant peut soumettre un nouveau lien qui remplace l'ancien                                                   | Should    |
+| EF11 | L'étudiant relu consulte sa note et son commentaire                | L'étudiant voit la note et le commentaire de son exercice relu, sans jamais voir l'identité du relecteur                                                                         | Must      |
+| EF12 | L'étudiant s'identifie sans mot de passe                           | L'étudiant sélectionne son nom dans la liste des étudiants de sa promotion avant de marquer sa présence ou déposer un exercice                                                | Must      |
 
 ## 5. Exigences non fonctionnelles
 
-| Réf | Exigence | Comment on la vérifie |
-|---|---|---|
-| ENF1 | Volumétrie : une promotion compte au plus 60 étudiants, une dizaine de sessions actives en parallèle au plus | Jeux de données de démo dimensionnés en conséquence, pas de pagination nécessaire côté tableau |
-| ENF2 | Usage mobile pour l'écran étudiant | Écran étudiant testé et lisible à 375 px de large (téléphone), en usage tactile |
-| ENF3 | Temps de réponse perçu court sur les actions critiques (marquer présence, déposer exercice) | Réponse API sous 300 ms en conditions de démo (base locale, données de démo) |
-| ENF4 | Aucune donnée sensible exposée | Pas de mot de passe à protéger (Q1) ; l'identité du relecteur n'est jamais renvoyée à l'étudiant relu (Q8) |
-| ENF5 | Disponibilité simple | Usage interne en présentiel, pas de contrainte de haute disponibilité ; redémarrage du service acceptable |
+
+| Réf | Exigence                                                                                                        | Comment on la vérifie                                                                                           |
+| ---- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| ENF1 | Volumétrie : une promotion compte au plus 60 étudiants, une dizaine de sessions actives en parallèle au plus | Jeux de données de démo dimensionnés en conséquence, pas de pagination nécessaire côté tableau            |
+| ENF2 | Usage mobile pour l'écran étudiant                                                                            | Écran étudiant testé et lisible à 375 px de large (téléphone), en usage tactile                            |
+| ENF3 | Temps de réponse perçu court sur les actions critiques (marquer présence, déposer exercice)                 | Réponse API sous 300 ms en conditions de démo (base locale, données de démo)                                 |
+| ENF4 | Aucune donnée sensible exposée                                                                                | Pas de mot de passe à protéger (Q1) ; l'identité du relecteur n'est jamais renvoyée à l'étudiant relu (Q8) |
+| ENF5 | Disponibilité simple                                                                                           | Usage interne en présentiel, pas de contrainte de haute disponibilité ; redémarrage du service acceptable     |
 
 ## 6. Règles de gestion
 
-| Réf | Règle | Source |
-|---|---|---|
-| RG1 | Le code de présence expire 15 minutes après l'ouverture de la session | Q2 |
-| RG2 | Aucune présence ne peut être marquée après expiration du code ou clôture de la session | Q2, Q3 |
-| RG3 | Après 5 erreurs de code consécutives par un même étudiant, blocage de 2 minutes avant un nouvel essai | Q4 |
-| RG4 | Un étudiant ne peut jamais relire son propre exercice | Q5 |
-| RG5 | Un exercice a au maximum un seul relecteur | Q6 |
-| RG6 | Le relecteur est tiré au sort par le système parmi les étudiants présents à la session, hors le déposant | Q7 |
-| RG7 | L'étudiant relu voit la note et le commentaire, jamais l'identité du relecteur | Q8 |
-| RG8 | La note est un entier compris entre 0 et 20 inclus | Q9 |
-| RG9 | Une note est modifiable par son relecteur tant que la session n'est pas clôturée ; elle devient définitive à la clôture | Q10 / Q15 — tranché, voir §7 |
-| RG10 | Un exercice sans relecture rendue reste au statut « en attente » et doit être visible comme tel dans le tableau du formateur | Q11 |
-| RG11 | Le dépôt d'un exercice est possible jusqu'à la clôture de la session par le formateur, même après la fin programmée de la session | Q12 |
-| RG12 | Le lien d'un exercice peut être remplacé tant qu'aucune relecture n'a été commencée sur cet exercice | Q13 |
-| RG13 | Une présence ajoutée manuellement par le formateur porte la source `FORMATEUR` ; une présence saisie par l'étudiant porte la source `ETUDIANT` | Q14 |
-| RG14 | La clôture d'une session est une action explicite et volontaire du formateur, irréversible, qui verrouille présences, dépôts et corrections de note sur cette session | Trou comblé, voir §7 |
-| RG15 | Un étudiant ne peut marquer sa présence qu'une seule fois par session | Déduit du contrat (`409 déjà présent`) |
-| RG16 | Un étudiant ne peut déposer qu'un seul exercice par session | Déduit du contrat (`409 exercice déjà déposé`) |
+
+| Réf | Règle                                                                                                                                                                     | Source                                              |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| RG1  | Le code de présence expire 15 minutes après l'ouverture de la session                                                                                                    | Q2                                                  |
+| RG2  | Aucune présence ne peut être marquée après expiration du code ou clôture de la session                                                                                | Q2, Q3                                              |
+| RG3  | Après 5 erreurs de code consécutives par un même étudiant, blocage de 2 minutes avant un nouvel essai                                                                  | Q4                                                  |
+| RG4  | Un étudiant ne peut jamais relire son propre exercice                                                                                                                     | Q5                                                  |
+| RG5  | Un exercice a au maximum un seul relecteur                                                                                                                                 | Q6                                                  |
+| RG6  | Le relecteur est tiré au sort par le système parmi les étudiants présents à la session, hors le déposant                                                             | Q7                                                  |
+| RG7  | L'étudiant relu voit la note et le commentaire, jamais l'identité du relecteur                                                                                           | Q8                                                  |
+| RG8  | La note est un entier compris entre 0 et 20 inclus                                                                                                                         | Q9                                                  |
+| RG9  | Une note est modifiable par son relecteur tant que la session n'est pas clôturée ; elle devient définitive à la clôture                                               | Q10 / Q15 — tranché, voir §7                     |
+| RG10 | Un exercice sans relecture rendue reste au statut « en attente » et doit être visible comme tel dans le tableau du formateur                                            | Q11                                                 |
+| RG11 | Le dépôt d'un exercice est possible jusqu'à la clôture de la session par le formateur, même après la fin programmée de la session                                   | Q12                                                 |
+| RG12 | Le lien d'un exercice peut être remplacé tant qu'aucune relecture n'a été commencée sur cet exercice                                                                  | Q13                                                 |
+| RG13 | Une présence ajoutée manuellement par le formateur porte la source`FORMATEUR` ; une présence saisie par l'étudiant porte la source `ETUDIANT`                          | Q14                                                 |
+| RG14 | La clôture d'une session est une action explicite et volontaire du formateur, irréversible, qui verrouille présences, dépôts et corrections de note sur cette session | Trou comblé, voir §7                              |
+| RG15 | Un étudiant ne peut marquer sa présence qu'une seule fois par session                                                                                                    | Déduit du contrat (`409 déjà présent`)          |
+| RG16 | Un étudiant ne peut déposer qu'un seul exercice par session                                                                                                              | Déduit du contrat (`409 exercice déjà déposé`) |
 
 ## 7. Zones d'ombre, hypothèses et contradictions
 
-| Point | Réponse client (Qx) ou hypothèse | Décision retenue | Pourquoi |
-|---|---|---|---|
-| Correction de note après envoi | Q10 dit que le relecteur peut corriger sa note tant que la session n'est pas clôturée ; Q15 dit que la note est définitive dès l'envoi — contradiction directe | On retient Q10 : la note reste modifiable tant que la session est ouverte, et devient définitive à la clôture (RG9) | Q15 devient vraie à l'échelle de la session entière, au moment de la clôture, plutôt qu'à l'échelle de chaque relecture individuelle. Le formateur garde le dernier mot en clôturant, et le relecteur garde un droit à l'erreur avant ça — aucune des deux réponses n'est ignorée, chacune s'applique à un moment différent |
-| Mécanisme de clôture de session absent du contrat | Aucune `Qx` ne décrit comment se clôture une session, alors que Q10 et Q12 s'y réfèrent explicitement | Ajout d'un endpoint `PATCH /api/sessions/{id}/cloturer` (RG14, EF8), action explicite et volontaire du formateur | Q12 dit « jusqu'à ce que je clôture la session », ce qui sous-entend une action du formateur et non un simple timeout ; sans ce mécanisme, RG9 et RG11 seraient inapplicables |
-| Moment du tirage au sort du relecteur | Aucune `Qx` ne précise quand a lieu l'assignation | Le tirage a lieu immédiatement après le dépôt de l'exercice, parmi les étudiants déjà présents à cet instant ; si aucun étudiant éligible n'est présent, l'exercice reste « en attente d'assignation » jusqu'à ce qu'un candidat devienne éligible ou jusqu'à la clôture | Cohérent avec Q7 (« présents à cette session ») ; évite d'introduire un déclencheur manuel que le client n'a pas demandé |
-| Identification étudiant sans mot de passe | Q1 dit que l'étudiant « choisit son nom dans une liste » | La liste des étudiants provient de la promotion (`GET /api/promotions/{id}/etudiants`) ; le serveur vérifie que l'`etudiantId` transmis existe bien dans la promotion pour chaque action | Q1 exclut le mot de passe mais n'exclut pas une vérification minimale d'intégrité ; sans elle, n'importe qui pourrait usurper un `etudiantId` au hasard |
+
+| Point                                               | Réponse client (Qx) ou hypothèse                                                                                                                                  | Décision retenue                                                                                                                                                                                                                                                                          | Pourquoi                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Correction de note après envoi                     | Q10 dit que le relecteur peut corriger sa note tant que la session n'est pas clôturée ; Q15 dit que la note est définitive dès l'envoi — contradiction directe | On retient Q10 : la note reste modifiable tant que la session est ouverte, et devient définitive à la clôture (RG9)                                                                                                                                                                     | Q15 devient vraie à l'échelle de la session entière, au moment de la clôture, plutôt qu'à l'échelle de chaque relecture individuelle. Le formateur garde le dernier mot en clôturant, et le relecteur garde un droit à l'erreur avant ça — aucune des deux réponses n'est ignorée, chacune s'applique à un moment différent |
+| Mécanisme de clôture de session absent du contrat | Aucune`Qx` ne décrit comment se clôture une session, alors que Q10 et Q12 s'y réfèrent explicitement                                                            | Ajout d'un endpoint`PATCH /api/sessions/{id}/cloturer` (RG14, EF8), action explicite et volontaire du formateur                                                                                                                                                                            | Q12 dit « jusqu'à ce que je clôture la session », ce qui sous-entend une action du formateur et non un simple timeout ; sans ce mécanisme, RG9 et RG11 seraient inapplicables                                                                                                                                                         |
+| Moment du tirage au sort du relecteur               | Aucune`Qx` ne précise quand a lieu l'assignation                                                                                                                   | Le tirage a lieu immédiatement après le dépôt de l'exercice, parmi les étudiants déjà présents à cet instant ; si aucun étudiant éligible n'est présent, l'exercice reste « en attente d'assignation » jusqu'à ce qu'un candidat devienne éligible ou jusqu'à la clôture | Cohérent avec Q7 (« présents à cette session ») ; évite d'introduire un déclencheur manuel que le client n'a pas demandé                                                                                                                                                                                                           |
+| Identification étudiant sans mot de passe          | Q1 dit que l'étudiant « choisit son nom dans une liste »                                                                                                         | La liste des étudiants provient de la promotion (`GET /api/promotions/{id}/etudiants`) ; le serveur vérifie que l'`etudiantId` transmis existe bien dans la promotion pour chaque action                                                                                                 | Q1 exclut le mot de passe mais n'exclut pas une vérification minimale d'intégrité ; sans elle, n'importe qui pourrait usurper un`etudiantId` au hasard                                                                                                                                                                                  |
 
 ## 8. Contraintes techniques
 
