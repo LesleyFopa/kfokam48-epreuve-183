@@ -6,9 +6,11 @@ import com.kfokam48.presence.domain.Presence;
 import com.kfokam48.presence.domain.Relecture;
 import com.kfokam48.presence.domain.Session;
 import com.kfokam48.presence.domain.StatutExercice;
+import com.kfokam48.presence.domain.StatutRelecture;
 import com.kfokam48.presence.dto.ExerciceCreateResponse;
 import com.kfokam48.presence.dto.ExerciceRequest;
 import com.kfokam48.presence.dto.ExerciceVueEtudiant;
+import com.kfokam48.presence.dto.RelectureResume;
 import com.kfokam48.presence.exception.ApiException;
 import com.kfokam48.presence.repository.EtudiantRepository;
 import com.kfokam48.presence.repository.ExerciceRepository;
@@ -21,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -30,6 +34,9 @@ public class ExerciceService {
 
     private static final Pattern LIEN_VALIDE = Pattern.compile("^https?://\\S+\\.\\S+.*$");
     private static final SecureRandom RANDOM = new SecureRandom();
+
+    /** RG5, étape 3 : chaque exercice est relu par exactement deux relecteurs distincts. */
+    private static final int NOMBRE_RELECTEURS = 2;
 
     private final ExerciceRepository exerciceRepository;
     private final RelectureRepository relectureRepository;
@@ -51,8 +58,10 @@ public class ExerciceService {
 
     /**
      * EF3, RG11, RG16 : dépôt d'un exercice, possible jusqu'à la clôture de la session.
-     * EF4, RG4, RG5, RG6 : tente ensuite d'assigner un relecteur au hasard parmi les
-     * étudiants déjà présents (hypothèse tranchée en §7 du cahier des charges).
+     * EF4, RG4, RG5, RG6 : tente ensuite d'assigner deux relecteurs distincts au hasard
+     * parmi les étudiants déjà présents (hypothèse tranchée en §7 du cahier des charges).
+     * Si un seul candidat éligible est présent, un seul relecteur est assigné — l'exercice
+     * n'attend pas indéfiniment un second relecteur qui n'existe pas encore.
      */
     public ExerciceCreateResponse deposer(ExerciceRequest requete) {
         if (!LIEN_VALIDE.matcher(requete.lien()).matches()) {
@@ -79,13 +88,14 @@ public class ExerciceService {
         exercice.setStatut(StatutExercice.DEPOSE);
         exercice = exerciceRepository.save(exercice);
 
-        Etudiant relecteur = tirerRelecteur(session.getId(), etudiant.getId());
-        if (relecteur != null) {
+        List<Etudiant> relecteurs = tirerRelecteurs(session.getId(), etudiant.getId());
+        for (Etudiant relecteur : relecteurs) {
             Relecture relecture = new Relecture();
             relecture.setExercice(exercice);
             relecture.setRelecteur(relecteur);
             relectureRepository.save(relecture);
-
+        }
+        if (!relecteurs.isEmpty()) {
             exercice.setStatut(StatutExercice.EN_ATTENTE);
             exercice.setMajAt(Instant.now());
             exercice = exerciceRepository.save(exercice);
@@ -94,35 +104,51 @@ public class ExerciceService {
         return new ExerciceCreateResponse(exercice.getId(), exercice.getStatut().name());
     }
 
-    /** EF11, RG7 : l'étudiant consulte ses exercices, note et commentaire reçus, jamais le relecteur. */
+    /**
+     * EF11, EF13, RG7, RG17 : l'étudiant consulte ses exercices, la note retenue
+     * (moyenne des relectures rendues, provisoire tant qu'il en manque une) et les
+     * commentaires reçus — jamais l'identité d'un relecteur.
+     */
     public List<ExerciceVueEtudiant> consulterParEtudiant(Long etudiantId) {
         if (!etudiantRepository.existsById(etudiantId)) {
             throw new ApiException(HttpStatus.NOT_FOUND, "ETUDIANT_INCONNU", "Étudiant inconnu.");
         }
         return exerciceRepository.findByEtudiantId(etudiantId).stream()
-                .map(exercice -> {
-                    var relecture = relectureRepository.findByExerciceId(exercice.getId()).orElse(null);
-                    Integer note = null;
-                    String commentaire = null;
-                    if (relecture != null && relecture.getStatut() == com.kfokam48.presence.domain.StatutRelecture.RENDUE) {
-                        note = relecture.getNote();
-                        commentaire = relecture.getCommentaire();
-                    }
-                    return new ExerciceVueEtudiant(
-                            exercice.getId(), exercice.getSession().getId(), exercice.getLien(),
-                            exercice.getStatut().name(), note, commentaire);
-                })
+                .map(this::versVueEtudiant)
                 .toList();
     }
 
-    private Etudiant tirerRelecteur(Long sessionId, Long deposantId) {
-        List<Etudiant> eligibles = presenceRepository.findBySessionId(sessionId).stream()
+    private ExerciceVueEtudiant versVueEtudiant(Exercice exercice) {
+        List<Relecture> relectures = relectureRepository.findByExerciceId(exercice.getId());
+
+        List<RelectureResume> resumes = relectures.stream()
+                .map(r -> new RelectureResume(
+                        r.getStatut() == StatutRelecture.RENDUE ? r.getNote() : null,
+                        r.getStatut() == StatutRelecture.RENDUE ? r.getCommentaire() : null,
+                        r.getStatut().name()))
+                .toList();
+
+        List<Integer> notesRendues = relectures.stream()
+                .filter(r -> r.getStatut() == StatutRelecture.RENDUE)
+                .map(Relecture::getNote)
+                .toList();
+
+        Double noteRetenue = notesRendues.isEmpty()
+                ? null
+                : notesRendues.stream().mapToInt(Integer::intValue).average().orElse(0);
+        boolean provisoire = !notesRendues.isEmpty() && notesRendues.size() < relectures.size();
+
+        return new ExerciceVueEtudiant(
+                exercice.getId(), exercice.getSession().getId(), exercice.getLien(),
+                exercice.getStatut().name(), noteRetenue, provisoire, resumes);
+    }
+
+    private List<Etudiant> tirerRelecteurs(Long sessionId, Long deposantId) {
+        List<Etudiant> eligibles = new ArrayList<>(presenceRepository.findBySessionId(sessionId).stream()
                 .map(Presence::getEtudiant)
                 .filter(e -> !e.getId().equals(deposantId))
-                .toList();
-        if (eligibles.isEmpty()) {
-            return null;
-        }
-        return eligibles.get(RANDOM.nextInt(eligibles.size()));
+                .toList());
+        Collections.shuffle(eligibles, RANDOM);
+        return eligibles.subList(0, Math.min(NOMBRE_RELECTEURS, eligibles.size()));
     }
 }

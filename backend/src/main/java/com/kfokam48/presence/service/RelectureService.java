@@ -52,9 +52,20 @@ public class RelectureService {
         relecture.setRendueAt(Instant.now());
         relectureRepository.save(relecture);
 
-        exercice.setStatut(StatutExercice.RELU);
+        exercice.setStatut(statutApresRelecture(exercice));
         exercice.setMajAt(Instant.now());
         exerciceRepository.save(exercice);
+    }
+
+    /**
+     * RG17, étape 3 : RELU quand toutes les relectures assignées à l'exercice
+     * sont rendues (une seule s'il n'y en avait qu'une par manque de candidats,
+     * deux dans le cas normal) ; PROVISOIRE tant qu'il en manque une.
+     */
+    private StatutExercice statutApresRelecture(Exercice exercice) {
+        List<Relecture> toutes = relectureRepository.findByExerciceId(exercice.getId());
+        long rendues = toutes.stream().filter(r -> r.getStatut() == StatutRelecture.RENDUE).count();
+        return rendues >= toutes.size() ? StatutExercice.RELU : StatutExercice.PROVISOIRE;
     }
 
     /** EF5 : un relecteur découvre les relectures qui lui sont assignées. */
