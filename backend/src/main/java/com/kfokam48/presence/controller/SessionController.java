@@ -1,11 +1,15 @@
 package com.kfokam48.presence.controller;
 
+import com.kfokam48.presence.dto.PresenceManuelleRequest;
+import com.kfokam48.presence.dto.PresenceResponse;
 import com.kfokam48.presence.dto.SessionCreateRequest;
 import com.kfokam48.presence.dto.SessionResponse;
+import com.kfokam48.presence.service.PresenceService;
 import com.kfokam48.presence.service.SessionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,14 +20,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class SessionController {
 
     private final SessionService sessionService;
+    private final PresenceService presenceService;
 
-    public SessionController(SessionService sessionService) {
+    public SessionController(SessionService sessionService, PresenceService presenceService) {
         this.sessionService = sessionService;
+        this.presenceService = presenceService;
     }
 
     @PostMapping
     public ResponseEntity<SessionResponse> ouvrir(@Valid @RequestBody SessionCreateRequest requete) {
         SessionResponse reponse = sessionService.ouvrir(requete);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reponse);
+    }
+
+    @PostMapping("/{id}/presences")
+    public ResponseEntity<PresenceResponse> ajouterPresenceManuelle(
+            @PathVariable Long id, @Valid @RequestBody PresenceManuelleRequest requete) {
+        PresenceResponse reponse = presenceService.ajouterManuellement(id, requete);
         return ResponseEntity.status(HttpStatus.CREATED).body(reponse);
     }
 }
