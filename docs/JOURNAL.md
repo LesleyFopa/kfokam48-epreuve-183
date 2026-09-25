@@ -40,7 +40,9 @@ Chaque entrée répond aux trois mêmes questions :
 
 **IA :** proposé plusieurs hypothèses de cause (pool de connexions, verrouillage H2, état partagé) avant la bonne. Vérifié en écrivant le test AVANT de choisir : le test avec deux étudiants différents passait (pas de bug), celui avec le même étudiant échouait de façon reproductible (5/5) — c'est ce résultat empirique qui a tranché, pas une supposition.
 
-**Ce que j'ai sorti du périmètre pour absorber le changement, et pourquoi :**
+**Fait (partie 2, changement de besoin) :** analyse mise à jour dans un commit dédié (EF4/EF5/EF11 + nouvelle EF13, RG5/RG6 + nouvelle RG17, section 7, D2, D4, D1) avant tout code. Contrat `api/contrat.yaml` v1.2 (GET /api/exercices enrichi). Migration `V3` ajoutée, `V1`/`V2` intactes, vérifiée sur une base déjà remplie. 2 issues (#31, #32) ouvertes avant l'implémentation. Backend : deux relecteurs distincts assignés au dépôt, statut PROVISOIRE/RELU recalculé à chaque relecture rendue, note retenue = moyenne. Frontend : écran étudiant affiche la note retenue, le badge provisoire, les commentaires des deux relecteurs sans jamais leur identité. Testé de bout en bout dans le navigateur (dépôt → 2 relecteurs → 1re relecture provisoire → 2e relecture → moyenne exacte 15 pour 13+17). Suite complète : 11/11 tests, build frontend OK.
+
+**Ce que j'ai sorti du périmètre pour absorber le changement, et pourquoi :** EF9 (le relecteur corrige une note déjà envoyée) et EF10 (l'étudiant remplace le lien de son exercice) restent Should, non implémentées. C'étaient déjà les deux seules stories Should en attente depuis v0.1 ; les garder de côté a permis de traiter la double relecture (analyse + migration + backend + frontend) sans la bâcler, plutôt que de livrer les deux évolutions à moitié dans le temps restant.
 
 ---
 
