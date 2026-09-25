@@ -48,11 +48,11 @@ Chaque entrée répond aux trois mêmes questions :
 
 ## Étape 4 — Version finale
 
-**Fait :**
+**Fait :** EF9 (le relecteur corrige une note, PUT /api/relectures/{id}) et EF10 (l'étudiant remplace le lien, PUT /api/exercices/{id}) implémentées backend+frontend, testées de bout en bout — les deux dernières issues du backlog fermées, plus rien en attente. `CHANGELOG.md` créé, organisé par jalon. `README.md` revérifié en clonant réellement le dépôt dans un dossier à part : `./mvnw spring-boot:run` puis `npm install && npm run dev` fonctionnent tels quels, données de démo chargées (10 étudiants, 2 sessions), aucune config supplémentaire nécessaire. `[JALON] v1.0` poussé.
 
-**Bloqué :**
+**Bloqué :** rien de notable — les deux endpoints suivaient exactement le contrat déjà écrit en Phase 1, l'essentiel du temps est parti dans la vérification (tester "Corriger" sur la bonne relecture : j'ai d'abord corrigé par erreur la relecture d'un autre exercice en confondant les id, repéré en comparant la réponse à ce qui était attendu).
 
-**IA :**
+**IA :** aucune proposition de raccourci pris sans vérification à cette étape — chaque endpoint testé manuellement (curl puis navigateur) avant commit, le clone vierge testé littéralement en clonant le dépôt GitHub dans un répertoire séparé plutôt qu'en supposant que le README était à jour.
 
 ---
 
