@@ -195,6 +195,7 @@ input:focus, select:focus, textarea:focus {
 .banner.error {
   background: var(--danger-bg);
   color: var(--danger);
+  border: 1px solid var(--danger-border);
 }
 
 .banner.success {
