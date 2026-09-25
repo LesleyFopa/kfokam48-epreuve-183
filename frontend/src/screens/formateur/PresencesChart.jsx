@@ -37,7 +37,7 @@ export default function PresencesChart({ tableau }) {
   );
 
   if (tableau.length === 0) {
-    return <p className="muted">Pas encore de données.</p>;
+    return <div className="empty">Pas encore de données.</div>;
   }
 
   return (

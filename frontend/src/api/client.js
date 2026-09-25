@@ -13,11 +13,23 @@ export class ApiError extends Error {
   }
 }
 
+/** Vrai pour toute erreur qui n'est pas une réponse HTTP du backend (serveur injoignable, CORS, DNS...). */
+export function isNetworkError(err) {
+  return !(err instanceof ApiError);
+}
+
 async function request(path, options = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+  } catch (err) {
+    window.dispatchEvent(new CustomEvent("kfokam48:api-offline"));
+    throw err;
+  }
+  window.dispatchEvent(new CustomEvent("kfokam48:api-online"));
 
   if (response.status === 204) {
     return null;

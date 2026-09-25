@@ -6,6 +6,7 @@ import Spinner from "../../components/Spinner";
 import { useEtudiantIdentity } from "../../hooks/useEtudiantIdentity";
 import { marquerPresence } from "../../api/presences";
 import { deposerExercice, consulterExercices } from "../../api/exercices";
+import { isNetworkError } from "../../api/client";
 
 const STATUT_LABEL = {
   DEPOSE: "Déposé",
@@ -36,9 +37,12 @@ export default function EtudiantScreen() {
   const rafraichirExercices = useCallback(() => {
     if (!etudiantId) return;
     setExercicesLoading(true);
+    setExercicesError(null);
     consulterExercices(etudiantId)
       .then(setExercices)
-      .catch(setExercicesError)
+      .catch((err) => {
+        if (!isNetworkError(err)) setExercicesError(err);
+      })
       .finally(() => setExercicesLoading(false));
   }, [etudiantId]);
 
@@ -81,6 +85,11 @@ export default function EtudiantScreen() {
 
   return (
     <div>
+      <div className="pagehead">
+        <h1>Espace étudiant</h1>
+        <p>Marque ta présence, dépose tes exercices et suis leur relecture.</p>
+      </div>
+
       <IdentitySelect
         etudiants={etudiants}
         etudiantId={etudiantId}
@@ -162,7 +171,7 @@ export default function EtudiantScreen() {
         ) : !etudiantId ? (
           <p className="muted">Choisis ton nom pour voir tes exercices.</p>
         ) : exercices.length === 0 ? (
-          <p className="muted">Aucun exercice déposé pour l'instant.</p>
+          <div className="empty">Aucun exercice déposé pour l'instant.</div>
         ) : (
           <table>
             <thead>
