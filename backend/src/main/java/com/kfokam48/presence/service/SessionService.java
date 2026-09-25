@@ -56,6 +56,15 @@ public class SessionService {
         return new SessionResponse(session.getId(), session.getCode(), session.getOuvertureAt(), session.getExpirationAt());
     }
 
+    /** EF1, EF8 : retrouve la session actuellement ouverte d'une promotion. */
+    public SessionResponse sessionActive(Long promotionId) {
+        Session session = sessionRepository
+                .findFirstByPromotionIdAndStatutOrderByOuvertureAtDesc(promotionId, StatutSession.OUVERTE)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "AUCUNE_SESSION_OUVERTE",
+                        "Aucune session ouverte pour cette promotion."));
+        return new SessionResponse(session.getId(), session.getCode(), session.getOuvertureAt(), session.getExpirationAt());
+    }
+
     /** EF8, RG14 : clôture explicite et irréversible d'une session par le formateur. */
     public void cloturer(Long sessionId) {
         Session session = sessionRepository.findById(sessionId)

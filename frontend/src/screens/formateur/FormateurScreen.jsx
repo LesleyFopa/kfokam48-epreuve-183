@@ -4,31 +4,18 @@ import SuccessBanner from "../../components/SuccessBanner";
 import Spinner from "../../components/Spinner";
 import { PROMOTION_ID } from "../../config";
 import { getEtudiants } from "../../api/promotions";
-import { ouvrirSession, ajouterPresenceManuelle, cloturerSession } from "../../api/sessions";
+import { ouvrirSession, getSessionActive, ajouterPresenceManuelle, cloturerSession } from "../../api/sessions";
 import { getTableau } from "../../api/tableau";
+import { ApiError } from "../../api/client";
 import PresencesChart from "./PresencesChart";
 import ExercicesDonut from "./ExercicesDonut";
-
-const SESSION_STORAGE_KEY = "kfokam48-session-active";
-
-function lireSessionStockee() {
-  try {
-    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw);
-    return new Date(s.expirationAt) > new Date() ? s : null;
-  } catch {
-    return null;
-  }
-}
 
 export default function FormateurScreen() {
   const [etudiants, setEtudiants] = useState([]);
 
   const [titre, setTitre] = useState("");
-  // Persistée pour survivre à un changement d'onglet : le contrat n'expose
-  // aucun moyen de retrouver la session ouverte autrement (pas de GET /api/sessions).
-  const [session, setSession] = useState(lireSessionStockee);
+  const [session, setSession] = useState(null);
+  const [sessionLookupDone, setSessionLookupDone] = useState(false);
   const [sessionState, setSessionState] = useState({ loading: false, error: null });
 
   const [presenceEtudiantId, setPresenceEtudiantId] = useState("");
@@ -42,6 +29,19 @@ export default function FormateurScreen() {
 
   useEffect(() => {
     getEtudiants(PROMOTION_ID).then(setEtudiants).catch(() => {});
+  }, []);
+
+  // EF1/EF8 : retrouve la session déjà ouverte au chargement, plutôt que de
+  // dépendre d'un état local perdu au moindre changement d'onglet ou d'appareil.
+  useEffect(() => {
+    getSessionActive(PROMOTION_ID)
+      .then(setSession)
+      .catch((err) => {
+        if (!(err instanceof ApiError && err.status === 404)) {
+          setSessionState({ loading: false, error: err });
+        }
+      })
+      .finally(() => setSessionLookupDone(true));
   }, []);
 
   const rafraichirTableau = useCallback(() => {
@@ -62,7 +62,6 @@ export default function FormateurScreen() {
     try {
       const s = await ouvrirSession(titre.trim(), PROMOTION_ID);
       setSession(s);
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(s));
       setTitre("");
       setSessionState({ loading: false, error: null });
     } catch (err) {
@@ -88,7 +87,6 @@ export default function FormateurScreen() {
     try {
       await cloturerSession(session.id);
       setSession(null);
-      localStorage.removeItem(SESSION_STORAGE_KEY);
       setClotureState({ loading: false, error: null });
       rafraichirTableau();
     } catch (err) {
@@ -114,7 +112,9 @@ export default function FormateurScreen() {
       <div className="grid2">
         <div className="card">
           <div className="cardlabel">{session ? "Session ouverte" : "Ouvrir une session"}</div>
-          {session ? (
+          {!sessionLookupDone ? (
+            <Spinner />
+          ) : session ? (
             <div>
               <p style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>{session.code}</p>
               <p className="muted" style={{ margin: "0 0 12px" }}>
