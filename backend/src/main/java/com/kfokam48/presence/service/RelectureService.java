@@ -5,6 +5,7 @@ import com.kfokam48.presence.domain.Relecture;
 import com.kfokam48.presence.domain.StatutExercice;
 import com.kfokam48.presence.domain.StatutRelecture;
 import com.kfokam48.presence.dto.RelectureRequest;
+import com.kfokam48.presence.dto.RelectureVueRelecteur;
 import com.kfokam48.presence.exception.ApiException;
 import com.kfokam48.presence.repository.ExerciceRepository;
 import com.kfokam48.presence.repository.RelectureRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @Transactional
@@ -53,5 +55,13 @@ public class RelectureService {
         exercice.setStatut(StatutExercice.RELU);
         exercice.setMajAt(Instant.now());
         exerciceRepository.save(exercice);
+    }
+
+    /** EF5 : un relecteur découvre les relectures qui lui sont assignées. */
+    public List<RelectureVueRelecteur> pourRelecteur(Long relecteurId) {
+        return relectureRepository.findByRelecteurId(relecteurId).stream()
+                .map(r -> new RelectureVueRelecteur(
+                        r.getId(), r.getExercice().getId(), r.getExercice().getLien(), r.getStatut().name()))
+                .toList();
     }
 }
