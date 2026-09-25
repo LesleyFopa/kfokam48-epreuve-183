@@ -4,6 +4,12 @@ Ce diagramme doit correspondre exactement aux migrations Flyway/Liquibase du bac
 (`/backend/.../db/migration`). Toute divergence entre les deux sera une faute en
 Phase 2.
 
+> **Mis à jour à l'étape 3** : l'enveloppe remplace le relecteur unique (Q6) par deux
+> relecteurs distincts par exercice. `EXERCICE ||--o| RELECTURE` (0 ou 1) devient
+> `EXERCICE ||--o{ RELECTURE` (0 à 2, borne haute imposée par l'application, pas par
+> la base). La contrainte d'unicité passe de `RELECTURE(exercice_id)` à
+> `RELECTURE(exercice_id, relecteur_id)` — voir migration `V3`.
+
 ```mermaid
 erDiagram
     PROMOTION ||--o{ ETUDIANT : "compte"
@@ -13,7 +19,7 @@ erDiagram
     ETUDIANT ||--o{ PRESENCE : "marque"
     ETUDIANT ||--o{ EXERCICE : "dépose"
     ETUDIANT ||--o{ RELECTURE : "effectue en tant que relecteur"
-    EXERCICE ||--o| RELECTURE : "est relu par"
+    EXERCICE ||--o{ RELECTURE : "est relu par (0 à 2, RG5)"
 
     PROMOTION {
         bigint id PK
@@ -50,14 +56,14 @@ erDiagram
         bigint session_id FK
         bigint etudiant_id FK
         varchar lien
-        varchar statut "DEPOSE | EN_ATTENTE | RELU"
+        varchar statut "DEPOSE | EN_ATTENTE | PROVISOIRE | RELU, étape 3"
         timestamp cree_at
         timestamp maj_at
     }
 
     RELECTURE {
         bigint id PK
-        bigint exercice_id FK "unique, RG5 un seul relecteur"
+        bigint exercice_id FK "0 à 2 par exercice depuis l'étape 3, RG5"
         bigint relecteur_id FK "references etudiant, RG4 jamais soi-même"
         int note "0 à 20 entier, RG8, nullable tant que non rendue"
         varchar commentaire "nullable tant que non rendue"
@@ -69,4 +75,4 @@ erDiagram
 **Contraintes d'unicité notables (RG15, RG16, RG5) :**
 - `PRESENCE (session_id, etudiant_id)` — unique : un étudiant ne marque sa présence qu'une fois par session
 - `EXERCICE (session_id, etudiant_id)` — unique : un étudiant ne dépose qu'un exercice par session
-- `RELECTURE (exercice_id)` — unique : un seul relecteur par exercice
+- `RELECTURE (exercice_id, relecteur_id)` — unique depuis l'étape 3 : un même étudiant ne peut pas être tiré deux fois comme relecteur du même exercice (au plus deux lignes par exercice, imposé par l'application)
