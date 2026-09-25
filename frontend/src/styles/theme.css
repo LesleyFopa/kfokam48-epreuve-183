@@ -1,79 +1,106 @@
 :root {
-  --bg: #eef1f8;
+  --bg: #f5f3fc;
+  --bg-soft: #efecfa;
   --card: #ffffff;
-  --navbg: #e4e8f2;
-  --text1: #1e2a44;
-  --text2: #69708a;
-  --border: #e7e9f2;
-  --accent: #14b8a6;
+  --navbg: #f1eefb;
+  --text1: #241f47;
+  --text2: #6d6a8f;
+  --text3: #a8a4c2;
+  --border: #ece9f7;
+  --accent: #6c5ce0;
+  --accent-hover: #5b4bd1;
   --accent2: #3b82f6;
-  --accent3: #1e2a44;
+  --accent3: #241f47;
   --accent4: #f59e0b;
   --onaccent: #ffffff;
-  --pillactive: #1e2a44;
+  --pillactive: #6c5ce0;
   --pillactivetext: #ffffff;
-  --iconbadgebg: #e1f6f2;
-  --progresstrack: #e4e8f2;
-  --grid: #e7e9f2;
-  --tick: #69708a;
+  --iconbadgebg: #efe9fe;
+  --iconbadgebg2: #e3edfd;
+  --iconbadgebg3: #fdf1dc;
+  --progresstrack: #efecfa;
+  --grid: #ece9f7;
+  --tick: #6d6a8f;
   --danger: #e24b4a;
   --danger-bg: #fcebeb;
   --danger-border: #f5c1c1;
   --success: #0f6e56;
   --success-bg: #e1f5ee;
+  --shadow-sm: 0 1px 2px rgba(46, 33, 96, 0.06);
+  --shadow-card: 0 1px 3px rgba(46, 33, 96, 0.06), 0 10px 26px -14px rgba(46, 33, 96, 0.18);
+  --shadow-hover: 0 6px 14px rgba(46, 33, 96, 0.08), 0 16px 34px -14px rgba(46, 33, 96, 0.22);
+  --brand-gradient: linear-gradient(135deg, #7c6cf4, #5b4bd1);
 }
 
 /* Suit la préférence système tant que l'utilisateur n'a rien choisi manuellement. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1728;
-    --card: #161f36;
-    --navbg: #101a30;
-    --text1: #e7ebf5;
-    --text2: #8b93ab;
-    --border: #232d48;
-    --accent: #2dd4bf;
+    --bg: #120f1f;
+    --bg-soft: #0d0b18;
+    --card: #1c1832;
+    --navbg: #221d3d;
+    --text1: #eeebfa;
+    --text2: #a29dc4;
+    --text3: #6f6a8f;
+    --border: #2c2650;
+    --accent: #9b8afb;
+    --accent-hover: #b4a6ff;
     --accent2: #60a5fa;
-    --accent3: #8b93ab;
+    --accent3: #a29dc4;
     --accent4: #fbbf24;
-    --onaccent: #0f1728;
-    --pillactive: #2dd4bf;
-    --pillactivetext: #0f1728;
-    --iconbadgebg: #0f2e2a;
-    --progresstrack: #232d48;
-    --grid: #232d48;
-    --tick: #8b93ab;
+    --onaccent: #17132b;
+    --pillactive: #9b8afb;
+    --pillactivetext: #17132b;
+    --iconbadgebg: #2a2350;
+    --iconbadgebg2: #201f47;
+    --iconbadgebg3: #3a2c1c;
+    --progresstrack: #2c2650;
+    --grid: #2c2650;
+    --tick: #a29dc4;
     --danger: #ee8888;
     --danger-bg: #2a1414;
     --danger-border: #4a2020;
     --success: #5dcaa5;
     --success-bg: #04342c;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25), 0 10px 28px -14px rgba(0, 0, 0, 0.55);
+    --shadow-hover: 0 6px 14px rgba(0, 0, 0, 0.3), 0 18px 36px -16px rgba(0, 0, 0, 0.6);
+    --brand-gradient: linear-gradient(135deg, #9b8afb, #6c5ce0);
   }
 }
 
 /* Choix manuel (bouton) : même spécificité que la règle ci-dessus, placé
    après pour l'emporter dans les deux sens grâce à l'ordre des règles. */
 :root[data-theme="dark"] {
-  --bg: #0f1728;
-  --card: #161f36;
-  --navbg: #101a30;
-  --text1: #e7ebf5;
-  --text2: #8b93ab;
-  --border: #232d48;
-  --accent: #2dd4bf;
+  --bg: #120f1f;
+  --bg-soft: #0d0b18;
+  --card: #1c1832;
+  --navbg: #221d3d;
+  --text1: #eeebfa;
+  --text2: #a29dc4;
+  --text3: #6f6a8f;
+  --border: #2c2650;
+  --accent: #9b8afb;
+  --accent-hover: #b4a6ff;
   --accent2: #60a5fa;
-  --accent3: #8b93ab;
+  --accent3: #a29dc4;
   --accent4: #fbbf24;
-  --onaccent: #0f1728;
-  --pillactive: #2dd4bf;
-  --pillactivetext: #0f1728;
-  --iconbadgebg: #0f2e2a;
-  --progresstrack: #232d48;
-  --grid: #232d48;
-  --tick: #8b93ab;
+  --onaccent: #17132b;
+  --pillactive: #9b8afb;
+  --pillactivetext: #17132b;
+  --iconbadgebg: #2a2350;
+  --iconbadgebg2: #201f47;
+  --iconbadgebg3: #3a2c1c;
+  --progresstrack: #2c2650;
+  --grid: #2c2650;
+  --tick: #a29dc4;
   --danger: #ee8888;
   --danger-bg: #2a1414;
   --danger-border: #4a2020;
   --success: #5dcaa5;
   --success-bg: #04342c;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25), 0 10px 28px -14px rgba(0, 0, 0, 0.55);
+  --shadow-hover: 0 6px 14px rgba(0, 0, 0, 0.3), 0 18px 36px -16px rgba(0, 0, 0, 0.6);
+  --brand-gradient: linear-gradient(135deg, #9b8afb, #6c5ce0);
 }

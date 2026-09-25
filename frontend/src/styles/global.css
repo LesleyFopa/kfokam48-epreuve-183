@@ -2,18 +2,30 @@
   box-sizing: border-box;
 }
 
+html {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
   background: var(--bg);
+  background-image: radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 6%, transparent), transparent 45%);
+  background-attachment: fixed;
   color: var(--text1);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 .app {
-  max-width: 1080px;
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0 24px 48px;
 }
 
 .topbar {
@@ -21,32 +33,43 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 20px;
+  margin: 0 -24px 28px;
+  padding: 16px 24px;
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
 }
 
 .brandrow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .brandmark {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--accent);
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--brand-gradient);
   color: var(--onaccent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: -0.02em;
+  box-shadow: var(--shadow-sm);
 }
 
 .brandname {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
+  letter-spacing: -0.01em;
 }
 
 .pillnav {
@@ -55,6 +78,7 @@ body {
   background: var(--navbg);
   padding: 4px;
   border-radius: 999px;
+  border: 1px solid var(--border);
 }
 
 .pillnav a, .pillnav button {
@@ -67,19 +91,27 @@ body {
   background: transparent;
   cursor: pointer;
   font-family: inherit;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.pillnav a:hover:not(.active):not([aria-current="page"]) {
+  color: var(--text1);
+  background: color-mix(in srgb, var(--text1) 6%, transparent);
 }
 
 .pillnav a.active, .pillnav a[aria-current="page"] {
   background: var(--pillactive);
   color: var(--pillactivetext);
   font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }
 
 .iconbtn {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: none;
+  border: 1px solid var(--border);
   background: var(--navbg);
   color: var(--text2);
   display: flex;
@@ -87,80 +119,122 @@ body {
   justify-content: center;
   cursor: pointer;
   font-size: 15px;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.iconbtn:hover {
+  color: var(--text1);
+  background: color-mix(in srgb, var(--text1) 8%, var(--navbg));
+  transform: rotate(-12deg);
 }
 
 .card {
   background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 16px 18px;
+  padding: 22px 24px;
   min-width: 0;
+  box-shadow: var(--shadow-card);
 }
 
 .grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 14px;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .grid3 {
   display: grid;
   grid-template-columns: 1.3fr 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 14px;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 @media (max-width: 720px) {
   .grid2, .grid3 {
     grid-template-columns: 1fr;
   }
+  .app {
+    padding: 0 16px 36px;
+  }
+  .topbar {
+    margin: 0 -16px 22px;
+    padding: 12px 16px;
+  }
+}
+
+.pagehead {
+  margin: 4px 0 28px;
+}
+
+.pagehead h1 {
+  margin: 0 0 6px;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text1);
+}
+
+.pagehead p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text2);
 }
 
 .cardlabel {
   font-size: 11px;
   color: var(--text2);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: 10px;
 }
 
 .cardtop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
 }
 
 label {
   display: block;
   font-size: 12px;
   color: var(--text2);
-  margin-bottom: 4px;
+  font-weight: 500;
+  margin-bottom: 6px;
 }
 
 input, select, textarea {
   width: 100%;
   font-family: inherit;
   font-size: 14px;
-  padding: 9px 11px;
+  padding: 10px 13px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--bg-soft);
   color: var(--text1);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:hover, select:hover, textarea:hover {
+  border-color: color-mix(in srgb, var(--text2) 40%, var(--border));
 }
 
 input:focus, select:focus, textarea:focus {
-  outline: 2px solid var(--accent2);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 22%, transparent);
 }
 
 .field {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .btn {
   font-size: 13px;
-  padding: 9px 16px;
+  padding: 9px 18px;
   border-radius: 999px;
   border: none;
   background: var(--accent);
@@ -168,16 +242,38 @@ input:focus, select:focus, textarea:focus {
   cursor: pointer;
   font-weight: 600;
   font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .btn.secondary {
   background: var(--navbg);
   color: var(--text1);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.btn.secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text1) 6%, var(--navbg));
 }
 
 .btn.danger {
@@ -185,11 +281,19 @@ input:focus, select:focus, textarea:focus {
   color: #fff;
 }
 
+.btn.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, black 12%, var(--danger));
+}
+
 .banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   padding: 10px 14px;
   border-radius: 10px;
   font-size: 13px;
   margin-bottom: 14px;
+  line-height: 1.4;
 }
 
 .banner.error {
@@ -201,11 +305,22 @@ input:focus, select:focus, textarea:focus {
 .banner.success {
   background: var(--success-bg);
   color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
 }
 
 .muted {
   color: var(--text2);
   font-size: 12px;
+}
+
+.empty {
+  color: var(--text2);
+  font-size: 13px;
+  text-align: center;
+  padding: 28px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--bg-soft);
 }
 
 table {
@@ -220,22 +335,40 @@ th {
   color: var(--text2);
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 8px 10px;
+  letter-spacing: 0.04em;
+  padding: 12px;
   border-bottom: 1px solid var(--border);
 }
 
 td {
-  padding: 10px 10px;
+  padding: 14px 12px;
   color: var(--text1);
   border-bottom: 1px solid var(--border);
 }
 
+tbody tr {
+  transition: background 0.12s ease;
+}
+
+tbody tr:hover {
+  background: color-mix(in srgb, var(--text1) 3%, transparent);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+a {
+  color: var(--accent2);
+}
+
 .tag {
+  display: inline-block;
   font-size: 10px;
-  padding: 3px 8px;
+  padding: 3px 9px;
   border-radius: 999px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .spinner {
@@ -250,4 +383,51 @@ td {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Tuiles de statistiques (grid3 formateur) */
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+}
+
+.stat-body {
+  min-width: 0;
+}
+
+.stat-value {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  flex: none;
+}
+
+.namecell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }

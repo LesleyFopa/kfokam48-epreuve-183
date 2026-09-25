@@ -6,9 +6,10 @@ import { PROMOTION_ID } from "../../config";
 import { getEtudiants } from "../../api/promotions";
 import { ouvrirSession, getSessionActive, ajouterPresenceManuelle, cloturerSession } from "../../api/sessions";
 import { getTableau } from "../../api/tableau";
-import { ApiError } from "../../api/client";
+import { ApiError, isNetworkError } from "../../api/client";
 import PresencesChart from "./PresencesChart";
 import ExercicesDonut from "./ExercicesDonut";
+import Avatar from "../../components/Avatar";
 
 export default function FormateurScreen() {
   const [etudiants, setEtudiants] = useState([]);
@@ -37,7 +38,9 @@ export default function FormateurScreen() {
     getSessionActive(PROMOTION_ID)
       .then(setSession)
       .catch((err) => {
-        if (!(err instanceof ApiError && err.status === 404)) {
+        // Le serveur injoignable est déjà signalé par le bandeau global ; ici on
+        // ne remonte que les vraies erreurs métier (hors "pas de session" 404).
+        if (err instanceof ApiError && err.status !== 404) {
           setSessionState({ loading: false, error: err });
         }
       })
@@ -46,9 +49,12 @@ export default function FormateurScreen() {
 
   const rafraichirTableau = useCallback(() => {
     setTableauLoading(true);
+    setTableauError(null);
     getTableau(PROMOTION_ID)
       .then(setTableau)
-      .catch(setTableauError)
+      .catch((err) => {
+        if (!isNetworkError(err)) setTableauError(err);
+      })
       .finally(() => setTableauLoading(false));
   }, []);
 
@@ -109,6 +115,11 @@ export default function FormateurScreen() {
 
   return (
     <div>
+      <div className="pagehead">
+        <h1>Tableau de bord formateur</h1>
+        <p>Ouvre une session, suis les présences et le rendu des exercices de la promotion.</p>
+      </div>
+
       <div className="grid2">
         <div className="card">
           <div className="cardlabel">{session ? "Session ouverte" : "Ouvrir une session"}</div>
@@ -178,17 +189,47 @@ export default function FormateurScreen() {
       </div>
 
       <div className="grid3">
-        <div className="card">
-          <div className="cardlabel">Présences (total)</div>
-          <div style={{ fontSize: 28, fontWeight: 600 }}>{totaux.presences}</div>
+        <div className="card stat">
+          <div
+            className="stat-icon"
+            aria-hidden="true"
+            style={{ background: "var(--iconbadgebg)", color: "var(--accent)" }}
+          >
+            👥
+          </div>
+          <div className="stat-body">
+            <div className="cardlabel">Présences (total)</div>
+            <div className="stat-value">{totaux.presences}</div>
+          </div>
         </div>
-        <div className="card">
-          <div className="cardlabel">Exercices déposés</div>
-          <div style={{ fontSize: 28, fontWeight: 600 }}>{totaux.exercicesDeposes}</div>
+        <div className="card stat">
+          <div
+            className="stat-icon"
+            aria-hidden="true"
+            style={{ background: "var(--iconbadgebg2)", color: "var(--accent2)" }}
+          >
+            📄
+          </div>
+          <div className="stat-body">
+            <div className="cardlabel">Exercices déposés</div>
+            <div className="stat-value">{totaux.exercicesDeposes}</div>
+          </div>
         </div>
-        <div className="card">
-          <div className="cardlabel">Relectures en attente</div>
-          <div style={{ fontSize: 28, fontWeight: 600 }}>{totaux.relecturesEnAttente}</div>
+        <div className="card stat">
+          <div
+            className="stat-icon"
+            aria-hidden="true"
+            style={{
+              background: totaux.relecturesEnAttente > 0 ? "var(--danger-bg)" : "var(--iconbadgebg3)",
+              color: totaux.relecturesEnAttente > 0 ? "var(--danger)" : "var(--accent4)",
+            }}
+          >
+            ⏳
+          </div>
+          <div className="stat-body">
+            <div className="cardlabel">Relectures en attente</div>
+            <div className="stat-value">{totaux.relecturesEnAttente}</div>
+          </div>
         </div>
       </div>
 
@@ -215,6 +256,8 @@ export default function FormateurScreen() {
         <ErrorBanner error={tableauError} />
         {tableauLoading ? (
           <Spinner />
+        ) : tableau.length === 0 ? (
+          <div className="empty">Pas encore de données pour cette promotion.</div>
         ) : (
           <table>
             <thead>
@@ -229,7 +272,12 @@ export default function FormateurScreen() {
             <tbody>
               {tableau.map((l) => (
                 <tr key={l.etudiantId}>
-                  <td>{l.nom}</td>
+                  <td>
+                    <div className="namecell">
+                      <Avatar nom={l.nom} />
+                      {l.nom}
+                    </div>
+                  </td>
                   <td>{l.presences}</td>
                   <td>{l.exercicesDeposes}</td>
                   <td>{l.moyenne ?? "—"}</td>

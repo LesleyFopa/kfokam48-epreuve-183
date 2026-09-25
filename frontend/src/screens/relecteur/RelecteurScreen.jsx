@@ -5,6 +5,7 @@ import SuccessBanner from "../../components/SuccessBanner";
 import Spinner from "../../components/Spinner";
 import { useEtudiantIdentity } from "../../hooks/useEtudiantIdentity";
 import { getRelecturesAssignees, noterRelecture } from "../../api/relectures";
+import { isNetworkError } from "../../api/client";
 
 export default function RelecteurScreen() {
   const { etudiants, etudiantId, setEtudiantId, loading: loadingEtudiants } = useEtudiantIdentity();
@@ -21,9 +22,12 @@ export default function RelecteurScreen() {
   const rafraichir = useCallback(() => {
     if (!etudiantId) return;
     setListLoading(true);
+    setListError(null);
     getRelecturesAssignees(etudiantId)
       .then(setRelectures)
-      .catch(setListError)
+      .catch((err) => {
+        if (!isNetworkError(err)) setListError(err);
+      })
       .finally(() => setListLoading(false));
   }, [etudiantId]);
 
@@ -51,6 +55,11 @@ export default function RelecteurScreen() {
 
   return (
     <div>
+      <div className="pagehead">
+        <h1>Espace relecteur</h1>
+        <p>Consulte les exercices qui te sont assignés et note ceux en attente.</p>
+      </div>
+
       <IdentitySelect
         etudiants={etudiants}
         etudiantId={etudiantId}
@@ -73,7 +82,7 @@ export default function RelecteurScreen() {
         ) : !etudiantId ? (
           <p className="muted">Choisis ton nom pour voir tes relectures.</p>
         ) : relectures.length === 0 ? (
-          <p className="muted">Aucune relecture assignée pour l'instant.</p>
+          <div className="empty">Aucune relecture assignée pour l'instant.</div>
         ) : (
           <table>
             <thead>
