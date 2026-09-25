@@ -64,6 +64,33 @@ paths:
                   expirationAt: { type: string, format: date-time }
         "400": { $ref: "#/components/responses/Erreur" }
 
+  /api/sessions/active:
+    get:
+      summary: >
+        Le formateur retrouve la session actuellement ouverte pour une
+        promotion (EF1, EF8). Oublié à l'analyse : sans ceci, la session
+        ouverte n'était retrouvable que via l'état local du navigateur qui
+        l'a créée, perdu au moindre changement d'appareil ou de cache.
+      parameters:
+        - name: promotionId
+          in: query
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Session ouverte trouvée
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, code, ouvertureAt, expirationAt]
+                properties:
+                  id: { type: integer, format: int64 }
+                  code: { type: string }
+                  ouvertureAt: { type: string, format: date-time }
+                  expirationAt: { type: string, format: date-time }
+        "404": { $ref: "#/components/responses/Erreur" }   # AUCUNE_SESSION_OUVERTE
+
   /api/sessions/{id}/cloturer:
     patch:
       summary: >
