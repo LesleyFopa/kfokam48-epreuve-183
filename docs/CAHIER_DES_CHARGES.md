@@ -123,10 +123,9 @@ Imposées par le sujet, rappelées ici pour référence :
 ## 10. Démarche prévue
 
 1. **Analyse** (cette phase) : trancher les zones d'ombre, rédiger le cahier des charges, les diagrammes et le backlog, compléter le contrat d'API, poser `[JALON] analyse`
-2. **v0.1** : construire les stories Must uniquement, une branche et une PR par ticket, issues fermées par les commits, tests au fur et à mesure, `[JALON] v0.1`
+2. **v0.1** : construire les stories Must uniquement, une branche et une PR par issue, issues fermées par les commits, tests au fur et à mesure, `[JALON] v0.1`
 3. **Enveloppe** : ouvrir une issue avant de coder le correctif et l'évolution demandés, versionner la migration correspondante, mettre à jour contrat et documents d'analyse dans un commit dédié
 4. **v1.0** : compléter les stories Should/Could restantes selon le temps disponible, rédiger `CHANGELOG.md` et `README.md`, `[JALON] v1.0`
-5. **Épreuve Git** : traitée sur un dépôt séparé, indépendamment du projet
-6. **Soumission** : vérification des deux dépôts en navigation privée, relevé des hash, dépôt de `SOUMISSION.md` sur la plateforme
+5. **Soumission** : vérification du dépôt en navigation privée, relevé du hash, dépôt de `SOUMISSION.md` sur la plateforme
 
-**Definition of Done** : un ticket est terminé quand le code correspondant est mergé via une PR liée à l'issue, que les tests associés (s'il y en a) passent, que la documentation ou les diagrammes concernés sont à jour si le ticket les impacte, et que l'issue est fermée par ce merge.
+**Definition of Done** : une issue est terminée quand le code correspondant est mergé via une PR liée à l'issue, que les tests associés (s'il y en a) passent, que la documentation ou les diagrammes concernés sont à jour si l'issue les impacte, et que l'issue est fermée par ce merge.
