@@ -57,6 +57,31 @@ public class RelectureService {
         exerciceRepository.save(exercice);
     }
 
+    /** EF9, RG9 : le relecteur corrige une note déjà rendue, tant que la session est ouverte. */
+    public void corriger(Long relectureId, RelectureRequest requete) {
+        Relecture relecture = relectureRepository.findById(relectureId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "RELECTURE_INCONNUE", "Relecture inconnue."));
+
+        if (requete.note() == null || requete.note() < 0 || requete.note() > 20) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "NOTE_INVALIDE", "La note doit être un entier compris entre 0 et 20.");
+        }
+
+        Exercice exercice = relecture.getExercice();
+        if (!exercice.getSession().estOuverte()) {
+            throw new ApiException(HttpStatus.CONFLICT, "SESSION_CLOTUREE", "La session est clôturée, la note est définitive.");
+        }
+
+        relecture.setNote(requete.note());
+        relecture.setCommentaire(requete.commentaire());
+        relecture.setStatut(StatutRelecture.RENDUE);
+        relecture.setRendueAt(Instant.now());
+        relectureRepository.save(relecture);
+
+        exercice.setStatut(statutApresRelecture(exercice));
+        exercice.setMajAt(Instant.now());
+        exerciceRepository.save(exercice);
+    }
+
     /**
      * RG17, étape 3 : RELU quand toutes les relectures assignées à l'exercice
      * sont rendues (une seule s'il n'y en avait qu'une par manque de candidats,

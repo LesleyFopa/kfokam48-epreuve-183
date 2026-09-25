@@ -118,6 +118,30 @@ public class ExerciceService {
                 .toList();
     }
 
+    /**
+     * EF10, RG12 : l'étudiant remplace le lien de son exercice tant qu'aucune
+     * relecture n'a été rendue — un relecteur peut être assigné (statut
+     * EN_ATTENTE) sans que ça bloque le remplacement, seule une relecture
+     * effectivement rendue (PROVISOIRE ou RELU) le "commence" au sens de Q13.
+     */
+    public void remplacerLien(Long exerciceId, String nouveauLien) {
+        if (!LIEN_VALIDE.matcher(nouveauLien).matches()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "LIEN_INVALIDE", "Le lien de l'exercice n'est pas valide.");
+        }
+
+        Exercice exercice = exerciceRepository.findById(exerciceId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "EXERCICE_INCONNU", "Exercice inconnu."));
+
+        if (exercice.getStatut() == StatutExercice.PROVISOIRE || exercice.getStatut() == StatutExercice.RELU) {
+            throw new ApiException(HttpStatus.CONFLICT, "RELECTURE_DEJA_COMMENCEE",
+                    "Une relecture a déjà été rendue, le lien ne peut plus être remplacé.");
+        }
+
+        exercice.setLien(nouveauLien);
+        exercice.setMajAt(Instant.now());
+        exerciceRepository.save(exercice);
+    }
+
     private ExerciceVueEtudiant versVueEtudiant(Exercice exercice) {
         List<Relecture> relectures = relectureRepository.findByExerciceId(exercice.getId());
 

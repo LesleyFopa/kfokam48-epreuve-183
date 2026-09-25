@@ -4,7 +4,7 @@ import ErrorBanner from "../../components/ErrorBanner";
 import SuccessBanner from "../../components/SuccessBanner";
 import Spinner from "../../components/Spinner";
 import { useEtudiantIdentity } from "../../hooks/useEtudiantIdentity";
-import { getRelecturesAssignees, noterRelecture } from "../../api/relectures";
+import { getRelecturesAssignees, noterRelecture, corrigerRelecture } from "../../api/relectures";
 import { isNetworkError } from "../../api/client";
 
 export default function RelecteurScreen() {
@@ -42,8 +42,17 @@ export default function RelecteurScreen() {
     e.preventDefault();
     setFormState({ loading: true, error: null, success: null });
     try {
-      await noterRelecture(selectedId, Number(note), commentaire.trim());
-      setFormState({ loading: false, error: null, success: "Relecture envoyée." });
+      const dejaRendue = relectureSelectionnee?.statut === "RENDUE";
+      if (dejaRendue) {
+        await corrigerRelecture(selectedId, Number(note), commentaire.trim());
+      } else {
+        await noterRelecture(selectedId, Number(note), commentaire.trim());
+      }
+      setFormState({
+        loading: false,
+        error: null,
+        success: dejaRendue ? "Note corrigée." : "Relecture envoyée.",
+      });
       setNote("");
       setCommentaire("");
       setSelectedId("");
@@ -112,11 +121,9 @@ export default function RelecteurScreen() {
                     </span>
                   </td>
                   <td>
-                    {r.statut !== "RENDUE" && (
-                      <button type="button" className="btn secondary" onClick={() => setSelectedId(r.id)}>
-                        Relire
-                      </button>
-                    )}
+                    <button type="button" className="btn secondary" onClick={() => setSelectedId(r.id)}>
+                      {r.statut === "RENDUE" ? "Corriger" : "Relire"}
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -127,7 +134,9 @@ export default function RelecteurScreen() {
 
       {relectureSelectionnee && (
         <div className="card">
-          <div className="cardlabel">Noter l'exercice</div>
+          <div className="cardlabel">
+            {relectureSelectionnee.statut === "RENDUE" ? "Corriger la note" : "Noter l'exercice"}
+          </div>
           <p className="muted" style={{ marginTop: -4, marginBottom: 10 }}>
             {relectureSelectionnee.lienExercice}
           </p>
@@ -159,7 +168,13 @@ export default function RelecteurScreen() {
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button type="submit" className="btn" disabled={formState.loading}>
-                {formState.loading ? <Spinner /> : "Envoyer la relecture"}
+                {formState.loading ? (
+                  <Spinner />
+                ) : relectureSelectionnee.statut === "RENDUE" ? (
+                  "Corriger la note"
+                ) : (
+                  "Envoyer la relecture"
+                )}
               </button>
               <button type="button" className="btn secondary" onClick={() => setSelectedId("")}>
                 Annuler

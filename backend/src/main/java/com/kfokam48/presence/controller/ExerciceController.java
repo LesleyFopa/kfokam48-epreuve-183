@@ -1,6 +1,7 @@
 package com.kfokam48.presence.controller;
 
 import com.kfokam48.presence.dto.ExerciceCreateResponse;
+import com.kfokam48.presence.dto.ExerciceRemplacerLienRequest;
 import com.kfokam48.presence.dto.ExerciceRequest;
 import com.kfokam48.presence.dto.ExerciceVueEtudiant;
 import com.kfokam48.presence.service.ExerciceService;
@@ -8,7 +9,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,5 +38,11 @@ public class ExerciceController {
     @GetMapping
     public List<ExerciceVueEtudiant> consulter(@RequestParam Long etudiantId) {
         return exerciceService.consulterParEtudiant(etudiantId);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> remplacerLien(@PathVariable Long id, @Valid @RequestBody ExerciceRemplacerLienRequest requete) {
+        exerciceService.remplacerLien(id, requete.lien());
+        return ResponseEntity.ok().build();
     }
 }
