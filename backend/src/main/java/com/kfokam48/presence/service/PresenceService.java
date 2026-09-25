@@ -11,6 +11,7 @@ import com.kfokam48.presence.exception.ApiException;
 import com.kfokam48.presence.repository.EtudiantRepository;
 import com.kfokam48.presence.repository.PresenceRepository;
 import com.kfokam48.presence.repository.SessionRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +62,7 @@ public class PresenceService {
         presence.setSession(session);
         presence.setEtudiant(etudiant);
         presence.setSource(SourcePresence.ETUDIANT);
-        presence = presenceRepository.save(presence);
+        presence = enregistrerSansDoublon(presence);
 
         tentativeCodeTracker.reinitialiser(requete.etudiantId());
 
@@ -88,9 +89,25 @@ public class PresenceService {
         presence.setSession(session);
         presence.setEtudiant(etudiant);
         presence.setSource(SourcePresence.FORMATEUR);
-        presence = presenceRepository.save(presence);
+        presence = enregistrerSansDoublon(presence);
 
         return versReponse(presence);
+    }
+
+    /**
+     * RG15 : le contrôle "pas déjà présent" fait juste avant n'est pas atomique
+     * avec cette insertion — sous accès concurrent réel, deux requêtes peuvent
+     * toutes les deux passer le contrôle puis se disputer la même ligne
+     * (issue #26). La contrainte unique en base est le seul garde-fou fiable ;
+     * on s'appuie dessus et on traduit sa violation en réponse métier propre
+     * plutôt que de laisser fuiter une DataIntegrityViolationException brute.
+     */
+    private Presence enregistrerSansDoublon(Presence presence) {
+        try {
+            return presenceRepository.save(presence);
+        } catch (DataIntegrityViolationException e) {
+            throw new ApiException(HttpStatus.CONFLICT, "DEJA_PRESENT", "Présence déjà enregistrée pour cette session.");
+        }
     }
 
     private PresenceResponse versReponse(Presence presence) {
