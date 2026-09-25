@@ -24,11 +24,11 @@ Chaque entrée répond aux trois mêmes questions :
 
 ## Étape 2 — Première version
 
-**Fait :**
+**Fait :** backend Spring Boot complet (10 endpoints Must, migrations Flyway conformes à D2, gestion d'erreurs centralisée, 6 tests dont 1 unitaire RG3 et 1 intégration), frontend React (3 écrans, couche API dédiée, thème clair/sombre auto + manuel). 9 PR mergées, 10 issues Must fermées. Testé de bout en bout dans le navigateur : session → présence → dépôt → assignation automatique → relecture → tableau à jour → clôture.
 
-**Bloqué :**
+**Bloqué :** un `LazyInitializationException` sur `relecture.getExercice().getEtudiant()` hors session Hibernate (~15 min) — corrigé en ajoutant `@Transactional` aux services. Deux trous découverts en cours de route, absents du contrat figé en Phase 1 : aucun moyen pour le formateur d'ajouter une présence sans code (EF7), et aucun moyen pour un relecteur de découvrir l'id de sa relecture assignée. Les deux comblés par un endpoint dédié, en PR séparée, avant de continuer.
 
-**IA :**
+**IA :** génération du squelette Spring Boot (dépendances, structure de packages) et des DTO/contrôleurs à partir du contrat déjà figé — vérifié en testant chaque endpoint manuellement (`curl`) contre les codes HTTP et le format d'erreur exacts du contrat avant de committer. Pour le frontend, l'IA a proposé une palette et une mise en page inspirées d'une image de référence que j'ai fournie ; vérifié en testant le parcours complet dans le navigateur (formateur → étudiant → relecteur) et en confirmant que les graphiques du tableau de bord n'affichent que des données réellement renvoyées par l'API, sans moyenne recalculée côté client (F3).
 
 ---
 
